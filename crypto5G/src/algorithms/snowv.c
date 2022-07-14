@@ -8,6 +8,8 @@
 #define MAKEU32(a, b) (((u32)(a) << 16) | ((u32)(b) ))
 #define MAKEU16(a, b) (((u16)(a) << 8) | ((u16)(b) ))
 
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+
 u8 SBox[256] =
 {
 0x63,0x7C,0x77,0x7B,0xF2,0x6B,0x6F,0xC5,0x30,0x01,0x67,0x2B,0xFE,0xD7,0xAB,0x76,
@@ -160,14 +162,7 @@ void keyiv_setup(u8 *key, u8 *iv, int is_aead_mode, u8* out)
     { 
         u8 z[16];
         keystream(z);
-        
-        // for (int i = 0; i < 16; i++)
-        // {
-        //     printf("%02x ", z[i]);
-        // }
-        // printf("\n");
-
-        memcpy(out+16*i, z, 16);
+        memcpy(out+16*i, z, 16); // Copy the bytestreams to a buffer 
 
         for (int j = 0; j < 8; j++)
             A[j + 8] ^= MAKEU16(z[2 * j + 1], z[2 * j]);
@@ -182,4 +177,23 @@ void keyiv_setup(u8 *key, u8 *iv, int is_aead_mode, u8* out)
                 R1[j] ^= MAKEU32(MAKEU16(key[4 * j + 19], key[4 * j + 18]),
                 MAKEU16(key[4 * j + 17], key[4 * j + 16]));
     }
+}
+
+void snowv_encrypt(u8 *key, u8 *iv, u8 *plaintext, u64 text_sz, u8 *ciphertext)
+{
+    u8 buffer[256];
+    keyiv_setup(key, iv, 0, buffer);
+
+    for (u64 i = 0; i < text_sz; i += 16)
+    {
+        u8 key_stream[16];
+        keystream(key_stream);
+        for(u8 j = 0; j < min(16, text_sz - i); j++)
+            ciphertext[i + j] = key_stream[j] ^ plaintext[i + j];
+    }    
+}
+
+void snowv_decrypt(u8 *key, u8 *iv, u8 *ciphertext, u64 text_sz, u8 *plaintext)
+{
+    snowv_encrypt(key, iv, ciphertext, text_sz, plaintext);
 }

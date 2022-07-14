@@ -21,6 +21,8 @@ static PyObject* error_out(PyObject *m)
 
 static PyObject* snowv_initialize(PyObject *dummy, PyObject *args);
 static PyObject* snowv_keystream(PyObject *dummy, PyObject *args);
+static PyObject* encrypt(PyObject *dummy, PyObject *args);
+static PyObject* decrypt(PyObject *dummy, PyObject *args);
 static PyObject* gcm_encrypt(PyObject *dummy, PyObject *args);
 static PyObject* gcm_decrypt(PyObject *dummy, PyObject *args);
 
@@ -30,12 +32,19 @@ static char snowv_initialize_doc[] =
 static char snowv_keystream_doc[] = 
     "snowv_keystream(void) -> keystream [bytes]";
 
+static char snowv_encrypt_doc[] =
+    "snowv_encrypt(key [32 bytes], iv [16 bytes], plaintext [bytes]) -> ciphertext [bytes]";
+
+static char snowv_decrypt_doc[] =
+    "snowv_decrypt(key [32 bytes], iv [16 bytes], ciphertext [bytes]) -> plaintext [bytes]";
+
 static char gcm_encrypt_doc[] = 
-    "gcm_encrypt(key [32 bytes], iv [16 bytes], plaintext [bytes], aad [bytes]) -> None";
+    "gcm_encrypt(key [32 bytes], iv [16 bytes], plaintext [bytes], "\
+    "aad [bytes]) -> Tuple [ciphertext [bytes], mac [16 bytes]]";
 
 static char gcm_decript_doc[] = 
     "gcm_decrypt(key [32 bytes], iv [16 bytes], ciphertext [bytes], "\
-    "aad [bytes], mac [bytes]) -> None";
+    "aad [bytes], mac [bytes]) -> plaintext [bytes]";
 
 static PyMethodDef snowv_methods[] = 
 {
@@ -43,6 +52,8 @@ static PyMethodDef snowv_methods[] =
     {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
     {"snowv_initializer", snowv_initialize, METH_VARARGS, snowv_initialize_doc},
     {"snowv_keystream", snowv_keystream, METH_NOARGS, snowv_keystream_doc},
+    {"snowv_encrypt", encrypt, METH_VARARGS, snowv_encrypt_doc},
+    {"snowv_decrypt", decrypt, METH_VARARGS, snowv_decrypt_doc},
     {"snowv_gcm_encrypt", gcm_encrypt, METH_VARARGS, gcm_encrypt_doc},
     {"snowv_gcm_decrypt", gcm_decrypt, METH_VARARGS, gcm_decript_doc},
     { NULL, NULL, 0, NULL }
@@ -126,6 +137,64 @@ static PyObject* snowv_keystream(PyObject * dummy, PyObject *args)
     out = PyBytes_FromStringAndSize((char *)z, 16);
 
     return out;
+}
+
+static PyObject* encrypt(PyObject *dummy, PyObject *args)
+{
+    PyObject *cyphertext = 0;
+    Py_buffer key, iv, plaintext;
+
+    u64 text_sz;
+    u8 *buffer;
+
+    if (!PyArg_ParseTuple(args, "z*z*z*", &key, &iv, &plaintext))
+        return NULL;
+
+    if ((key.len != 32) || (iv.len != 16))
+    {
+        PyErr_SetString(PyExc_ValueError, "invalid args");
+        return NULL;
+    }
+
+    text_sz = (u64) plaintext.len;
+    buffer = (u8 *) malloc(text_sz);
+
+    snowv_encrypt((u8 *) key.buf, (u8 *) iv.buf, (u8 *) plaintext.buf,\
+                  text_sz, buffer);
+    
+    cyphertext = PyBytes_FromStringAndSize((char *)buffer, text_sz);
+    free(buffer);
+
+    return cyphertext;
+}
+
+static PyObject* decrypt(PyObject *dummy, PyObject *args)
+{
+    PyObject *plaintext = 0;
+    Py_buffer key, iv, cyphertext;
+
+    u64 text_sz;
+    u8 *buffer;
+
+    if (!PyArg_ParseTuple(args, "z*z*z*", &key, &iv, &cyphertext))
+        return NULL;
+
+    if ((key.len != 32) || (iv.len != 16))
+    {
+        PyErr_SetString(PyExc_ValueError, "invalid args");
+        return NULL;
+    }
+
+    text_sz = (u64) cyphertext.len;
+    buffer = (u8 *) malloc(text_sz);
+
+    snowv_decrypt((u8 *) key.buf, (u8 *) iv.buf, (u8 *) cyphertext.buf,\
+                  text_sz, buffer);
+    
+    plaintext = PyBytes_FromStringAndSize((char *)buffer, text_sz);
+    free(buffer);
+
+    return plaintext;
 }
 
 static PyObject* gcm_encrypt(PyObject * dummy, PyObject *args)

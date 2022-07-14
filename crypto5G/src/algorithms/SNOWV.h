@@ -23,6 +23,9 @@ void lfsr_update(void);
 void keystream(u8 *z);
 void keyiv_setup(u8 *key, u8 *iv, int is_aead_mode, u8* out);
 
+void snowv_encrypt(u8 *key, u8 *iv, u8 *plaintext, u64 text_sz, u8 *ciphertext);
+void snowv_decrypt(u8 *key, u8 *iv, u8 *ciphertext, u64 text_sz, u8 *plaintext);
+
 
 // AEAD-Mode
 void snowv_gcm_encrypt(u8 *A, u8 *ciphertext, u8 *plaintext, u64 plaintext_sz,\
