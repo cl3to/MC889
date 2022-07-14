@@ -47,12 +47,12 @@ def snow3g_enc(size):
     bitlen = size*8
     return snow3g.EEA1(key, count, bearer, direct, plaintxt, bitlen)
 
-def snowv_encrypt(size):
+def snowv_enc(size):
     snowv = SNOWV()
     key = bytes.fromhex('505152535455565758595a5b5c5d5e5f0a1a2a3a4a5a6a7a8a9aaabacadaeafa')
     iv = bytes.fromhex('0123456789abcdeffedcba9876543210')
     plaintxt = data[:size]
-    ciphertxt =  snowv.gcm_encrypt(key, iv, plaintxt, aad)
+    ciphertxt =  snowv.encrypt(key, iv, plaintxt)
     return ciphertxt
 
 def snowv_gcm_enc(size):
