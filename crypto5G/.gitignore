@@ -109,7 +109,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.pycripto5G
+.pycrypto5G
 
 # Spyder project settings
 .spyderproject
