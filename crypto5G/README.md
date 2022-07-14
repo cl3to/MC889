@@ -1,4 +1,4 @@
-# Algoritmos Criptograficos utilizados no sistema 5G
+# Algoritmos Criptográficos utilizados no sistema 5G
 
 ## Algoritmos Implementados
 - AES

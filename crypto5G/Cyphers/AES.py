@@ -149,7 +149,7 @@ class AES_CTR(object):
     block_size = 16
 
     def __init__(self, key, nonce, cnt=0) -> None:
-        """initialize AES in ECB mode with the given key and nonce buffer
+        """initialize AES in CTR mode with the given key and nonce buffer
         
         key  : 16 bytes buffer
         nonce: 8 most significant bytes buffer of the counter initial value
