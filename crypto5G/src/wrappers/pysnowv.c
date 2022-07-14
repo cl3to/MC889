@@ -21,8 +21,8 @@ static PyObject* error_out(PyObject *m)
 
 static PyObject* snowv_initialize(PyObject *dummy, PyObject *args);
 static PyObject* snowv_keystream(PyObject *dummy, PyObject *args);
-static PyObject* encrypt(PyObject *dummy, PyObject *args);
-static PyObject* decrypt(PyObject *dummy, PyObject *args);
+static PyObject* encrypt_wrapper(PyObject *dummy, PyObject *args);
+static PyObject* decrypt_wrapper(PyObject *dummy, PyObject *args);
 static PyObject* gcm_encrypt(PyObject *dummy, PyObject *args);
 static PyObject* gcm_decrypt(PyObject *dummy, PyObject *args);
 
@@ -52,8 +52,8 @@ static PyMethodDef snowv_methods[] =
     {"error_out", (PyCFunction)error_out, METH_NOARGS, NULL},
     {"snowv_initializer", snowv_initialize, METH_VARARGS, snowv_initialize_doc},
     {"snowv_keystream", snowv_keystream, METH_NOARGS, snowv_keystream_doc},
-    {"snowv_encrypt", encrypt, METH_VARARGS, snowv_encrypt_doc},
-    {"snowv_decrypt", decrypt, METH_VARARGS, snowv_decrypt_doc},
+    {"snowv_encrypt", encrypt_wrapper, METH_VARARGS, snowv_encrypt_doc},
+    {"snowv_decrypt", decrypt_wrapper, METH_VARARGS, snowv_decrypt_doc},
     {"snowv_gcm_encrypt", gcm_encrypt, METH_VARARGS, gcm_encrypt_doc},
     {"snowv_gcm_decrypt", gcm_decrypt, METH_VARARGS, gcm_decript_doc},
     { NULL, NULL, 0, NULL }
@@ -139,7 +139,7 @@ static PyObject* snowv_keystream(PyObject * dummy, PyObject *args)
     return out;
 }
 
-static PyObject* encrypt(PyObject *dummy, PyObject *args)
+static PyObject* encrypt_wrapper(PyObject *dummy, PyObject *args)
 {
     PyObject *cyphertext = 0;
     Py_buffer key, iv, plaintext;
@@ -168,7 +168,7 @@ static PyObject* encrypt(PyObject *dummy, PyObject *args)
     return cyphertext;
 }
 
-static PyObject* decrypt(PyObject *dummy, PyObject *args)
+static PyObject* decrypt_wrapper(PyObject *dummy, PyObject *args)
 {
     PyObject *plaintext = 0;
     Py_buffer key, iv, cyphertext;
