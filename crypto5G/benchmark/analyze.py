@@ -5,8 +5,9 @@ import seaborn as sns
 
 crypto_bench_df = pd.read_csv('benchmark/crypto_bench.csv', index_col=0)
 
-df = crypto_bench_df.reset_index()
+# Visual Benchmark
 
+df = crypto_bench_df.reset_index()
 df_melt = crypto_bench_df.reset_index().melt('index', var_name='bytes', value_name='vals')
 df_melt['bytes'] = df_melt['bytes'].str.replace('bytes', '')
 df_melt['bytes'] = df_melt['bytes'].astype('int')
@@ -19,3 +20,25 @@ g.ax.set_title(r'Tamanho da entrada $\times$ Tempo de encriptação dos Cifrador
 g.ax.legend(title='Cifrador')
 
 g.savefig('benchmark/fig.png')
+
+# Percentual Benchmark
+
+aes_row = crypto_bench_df.iloc[0]
+df2 = round((aes_row/crypto_bench_df), 2)
+
+df_melt = df2.reset_index().melt('index', var_name='bytes', value_name='vals')
+df_melt['bytes'] = df_melt['bytes'].str.replace('bytes', '')
+df_melt['bytes'] = df_melt['bytes'].astype('int')
+
+#print(df_melt)
+
+plt.figure(figsize=(14, 9))
+ax = sns.barplot(x="bytes", y="vals", hue="index", data=df_melt)
+ax.set_xlabel('Tamanho da mensagem (Bytes)', fontsize=14)
+ax.set_ylabel('Desempenho relativo ao AES', fontsize=14)
+ax.legend(title='Cifrador', fontsize=14, title_fontsize=14)
+
+ax.axhline(y=1, color='black', linestyle='--')
+ax.text(s="Baseline", x=6, y=1.2, fontsize=12)
+
+plt.savefig("benchmark/fig2.png")
