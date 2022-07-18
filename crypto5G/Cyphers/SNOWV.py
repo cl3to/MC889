@@ -8,7 +8,7 @@ class SNOWV(object):
     
     def _initializer(self, key, iv):
         try:
-            snowv_initializer(key, iv)
+            return snowv_initializer(key, iv, 0)
         except ValueError as e:
             raise(CMException(e))
 
@@ -17,6 +17,14 @@ class SNOWV(object):
             return snowv_keystream()
         except ValueError as err:
             raise(CMException(err))
+
+    def test_case(self, key, iv):
+        z0 = self._initializer(key, iv)
+        z = b''
+        for i in range(8):
+            z += self._keystream()
+        
+        return z0, z
 
     def encrypt(self, key, iv, plaintxt):
         if type(plaintxt) != bytes:
